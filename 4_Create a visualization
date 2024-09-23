@@ -1,0 +1,48 @@
+### After your process has collected data over a couple of days, create a visualization which shows the
+temporal development of the respective values.  ###
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import pandas as pd
+
+##First web page
+sns.set_style('ticks')
+plt.rcParams.update({'font.size': 8})
+
+sns.lineplot(x='Time of Day', y='Temp_1_C', data=df4, marker='o', color='navy', label='20-09-2024')
+sns.lineplot(x='Time of Day', y='Temp_2_C', data=df4, marker='s', color='teal', label='21-09-2024')
+
+# Set plot title and axes labels
+plt.title('Temperature of two consequtive days')
+plt.xlabel('Time of Day')
+plt.ylabel('Temperature (°C)')
+
+plt.legend(loc='lower right')
+plt.grid(True)
+sns.despine()
+plt.show()
+
+## Second web page
+
+df_x = df5[['Currency', 'Value_x']]
+df_y = df5[['Currency', 'Value_y']].rename(columns={'Value_y': 'Value_x'})
+
+
+df_x['Date'] = ['20-09-2024'] * len(df_x)
+df_y['Date'] = ['21-09-2024'] * len(df_y)
+
+
+result_df = pd.concat([df_x, df_y], ignore_index=True)
+print(result_df)
+
+sns.set(style='white')
+sns.barplot(x='Currency', y='Value_x', hue='Date', data=result_df)
+plt.show()
+
+## Third web page
+
+# Set plot style
+sns.set(style='white')
+sns.barplot(x='Dates', y='wheat price', data=df6)
+plt.show()
