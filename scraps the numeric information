@@ -1,0 +1,129 @@
+### Write a Python script which scraps the numeric information from the web pages a ###
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from datetime import date
+import h5py
+import numpy as np
+import tables
+
+
+#First web page
+url = "https://weather.com/weather/today/l/153e65f344ab389e17703aae99cf18a182265e8095831d55ddfcfc6c5aa9a91c"
+response = requests.get(url)
+soup = BeautifulSoup(response.content, "html.parser")
+
+morning_temp = soup.find('span', string="Morning").find_next('span', {'data-testid': 'TemperatureValue'}).text
+afternoon_temp = soup.find('span', string="Afternoon").find_next('span', {'data-testid': 'TemperatureValue'}).text
+evening_temp = soup.find('span', string="Evening").find_next('span', {'data-testid': 'TemperatureValue'}).text
+overnight_temp = soup.find('span', string="Overnight").find_next('span', {'data-testid': 'TemperatureValue'}).text
+
+data = {
+    "Time of Day": ["Morning", "Afternoon", "Evening", "Overnight"],
+    "Temperature (°C)": [morning_temp.replace("°", ""),
+                         afternoon_temp.replace("°", ""),
+                         evening_temp.replace("°", ""),
+                         overnight_temp.replace("°", ""),
+                         ]
+}
+
+df1 = pd.DataFrame(data)
+print(df1)
+df2 = pd.DataFrame(data)
+print(df2)
+
+# convert to csv
+df1.to_csv('temperatures1.csv', index=False)
+df2.to_csv('temperatures2.csv', index=False)
+
+df1 = pd.read_csv('temperatures.csv')
+df2 = pd.read_csv('temperatures2.csv')
+
+df3 = pd.merge(df1, df2, on = 'Time of Day')
+df3.set_index('Time of Day', inplace = True)
+
+# Convert to °C
+df3["Temp_1_C"] =  round((df3["Temperature (°C)_x"] - 32) * 5/9, 1)
+df3["Temp_2_C"] =  round((df3["Temperature (°C)_y"] - 32) * 5/9, 1)
+
+df3.to_csv('temperature_file.csv')
+
+
+
+#Second web page
+url2 = "https://www.x-rates.com/table/?from=EUR&amount=1"
+response = requests.get(url2)
+response1 = requests.get(url2)
+soup1 = BeautifulSoup(response1.content, "html.parser")
+table = soup1.find('table', class_='ratesTable')
+
+rows = table.find_all('tr')
+
+usd = None
+gbp = None
+aud = None
+cad = None
+
+for row in rows:
+    columns = row.find_all('td')
+    if len(columns) > 0:
+        currency = columns[0].text.strip()
+        rate = columns[1].text.strip()
+
+        if currency == 'US Dollar':
+            usd = rate
+        elif currency == 'British Pound':
+            gbp = rate
+        elif currency == 'Australian Dollar':
+            aud = rate
+        elif currency ==  'Canadian Dollar':
+            cad = rate
+
+data = {
+    "Currency": ["US Dollar", "British Pound", "Australian Dollar", "Canadian Dollar"],
+    "Value": [usd, gbp, aud, cad]
+}
+
+df1 = pd.DataFrame(data)
+print(df1)
+df1.to_csv('euro_a_currencies1.csv', index=False)
+df2 = pd.DataFrame(data)
+print(df2)
+df2.to_csv('euro_a_currencies2.csv', index=False)
+
+
+df1 = pd.read_csv('euro_a_currencies1.csv')
+df2 = pd.read_csv('euro_a_currencies2.csv')
+df3 = pd.merge(df1, df2, on = 'Currency')
+df3.set_index('Currency', inplace = True)
+df3.to_csv('euro_a_currencies_file.csv')
+
+#Third web page
+
+url11 ="https://www.google.com/finance/quote/ZWW00:CBOT?sa=X&ved=2ahUKEwjs7a7go9eIAxVx-gIHHdDNOO0Q3ecFegQIGBAX"
+response = requests.get(url11)
+response1 = requests.get(url11)
+soup3 = BeautifulSoup(response1.content, "html.parser")
+price = soup3.find(class_='YMlKec fxKbKc').text
+price = price.split('\xa0')[-1]
+price = price.lstrip('0')
+date = date.today()
+data = {"Dates": [date], "wheat price": [price]
+        }
+df1 = pd.DataFrame(data)
+print(df1)
+df1.to_csv('wheat_price1.csv', index=False)
+df2 = pd.DataFrame(data)
+print(df2)
+df2.to_csv('wheat_price2.csv', index=False)
+
+df_temp1 = pd.read_csv('wheat_price1.csv')
+df_temp2 = pd.read_csv('wheat_price2.csv')
+df_temp = df_temp1._append(df_temp2)
+df_temp.to_csv('wheat_price_file.csv', index=False)
+
+
+df4 = pd.read_csv("temperature_file.csv")
+df5 = pd.read_csv("euro_a_currencies_file.csv")
+df6 = pd.read_csv("wheat_price_file.csv")
