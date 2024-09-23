@@ -1,0 +1,15 @@
+### Save the results into a HDF5 file ###
+
+with pd.HDFStore('datasets.h5') as store:
+    store.put('dataset1', df4)
+    store.put('dataset2', df5)
+    store.put('dataset3', df6)
+
+with pd.HDFStore('datasets.h5') as store:
+    df4 = store.get('dataset1')
+    df5 = store.get('dataset2')
+    df6 = store.get('dataset3')
+
+print(df4)
+print(df5)
+print(df6)
